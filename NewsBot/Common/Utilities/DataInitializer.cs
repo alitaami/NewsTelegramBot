@@ -21,6 +21,7 @@ public class DataInitializer
             if (user != null)
             {
                 user.UserType = UserType.Admin;
+                user.Username = "admin";
                 context.Add(user);
 
                 context.SaveChanges();

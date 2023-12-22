@@ -12,6 +12,11 @@ namespace NewsBot.Data.NewsContext
 
         }
         public DbSet<User> Users { get; set; }
+        public DbSet<News> News { get; set; }
+        public DbSet<NewsKeyWord> NewsKeyWords { get; set; }
+        public DbSet<NewsUserCollection> NewsUserCollections { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
+        public DbSet<KeyWord> KeyWords { get; set; }
 
         public override int SaveChanges()
         {
