@@ -1,5 +1,3 @@
-using FarzamNews.Data;
-using FarzamNews.Entities;
 using Microsoft.EntityFrameworkCore;
 using NewsBot.Data.NewsContext;
 using NewsBot.Entities;
@@ -9,7 +7,7 @@ namespace FarzamNews.Utilities;
 
 public class DataInitializer
 {
-    internal static void Initialize(FarzamNewsContext context, IConfiguration configuration)
+    internal static void Initialize(NewsContext context, IConfiguration configuration)
     {
         context.Database.Migrate();
         InitData(context, configuration);
