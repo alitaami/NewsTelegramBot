@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 
-namespace Entities.Base;
+namespace NewsBot.Models.Base;
 
 public class APIException : HttpRequestException //ValidationException
 {
@@ -22,21 +22,21 @@ public class APIException : HttpRequestException //ValidationException
     public APIException(string? message, Exception? inner)
         : base(message, inner)
     {
-        ValidationResults = null; 
-        
+        ValidationResults = null;
+
         if (inner != null)
         {
             HResult = inner.HResult;
         }
     }
 
-    public APIException(string? message , HttpStatusCode statusCode)
-        : base(message, null , statusCode)
+    public APIException(string? message, HttpStatusCode statusCode)
+        : base(message, null, statusCode)
     { ValidationResults = null; }
 
 
-    public APIException(HttpStatusCode? statusCode , string? message, IReadOnlyCollection<ValidationResult> validationResults)
-        : base(message , null, statusCode)
+    public APIException(HttpStatusCode? statusCode, string? message, IReadOnlyCollection<ValidationResult> validationResults)
+        : base(message, null, statusCode)
     { ValidationResults = validationResults; }
 
     //======================

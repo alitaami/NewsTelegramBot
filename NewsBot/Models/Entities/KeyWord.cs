@@ -1,4 +1,4 @@
-﻿namespace NewsBot.Entities
+﻿namespace NewsBot.Models.Entities
 {
     public class KeyWord
     {

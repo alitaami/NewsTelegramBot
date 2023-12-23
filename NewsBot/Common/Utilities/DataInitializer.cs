@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using NewsBot.Data.NewsContext;
-using NewsBot.Entities;
 using NewsBot.Enums;
+using NewsBot.Models.Entities;
+using NewsBot.Models;
+using NewsBot.Entities;
 
 namespace FarzamNews.Utilities;
 

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text.Json.Serialization;
 
-namespace Entities.Base
+namespace NewsBot.Models.Base
 {
     public class ApiResult
     {
@@ -47,9 +47,9 @@ namespace Entities.Base
         RoleNotFound = 18,
         UserIsNotActive = 19,
         DuplicateKey = 20,
-        DatabaseWriteError =21,
-        DatabaseConnectionError =22,
-        NullField =23
+        DatabaseWriteError = 21,
+        DatabaseConnectionError = 22,
+        NullField = 23
     }
 
     public class FieldErrorItem

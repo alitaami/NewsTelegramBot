@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using NewsBot.Models.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewsBot.Entities
 {

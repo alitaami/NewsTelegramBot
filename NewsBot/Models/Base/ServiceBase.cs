@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Entities.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using NewsBot.Common.Resources;
 
-namespace EstateAgentApi.Services.Base
+namespace NewsBot.Models.Base
 {
     public class ServiceBase<Tclass>
     {
@@ -89,7 +88,7 @@ namespace EstateAgentApi.Services.Base
                 //TODO: ErrorCode اضافه و مشخص شود
                 return BadRequest(ErrorCodeEnum.None, "به دلیل نقض یونیک بودن بعضی از فیلدها امکان اضافه شدن و یا اپدیت وجود ندارد ", null);
             }
-            else if (sqlEx != null && (sqlEx.Number == 547))  /// Foreign key constraint violation
+            else if (sqlEx != null && sqlEx.Number == 547)  /// Foreign key constraint violation
             {
                 return BadRequest(ErrorCodeEnum.None, "به دلیل نقض محدودیت کلید خارجی امکان درج یا آپدیت وجود ندارد", null);
             }

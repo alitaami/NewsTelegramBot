@@ -1,6 +1,7 @@
 ﻿using FarzamNews.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NewsBot.Entities;
+using NewsBot.Models.Entities;
 using System.Reflection;
 
 namespace NewsBot.Data.NewsContext
