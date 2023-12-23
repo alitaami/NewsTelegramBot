@@ -32,7 +32,16 @@ namespace Data.Repositories
             if (saveNow)
                 await DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
+        public async Task<TEntity> AddAsync2(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)
+        {
+            Assert.NotNull(entity, nameof(entity));
+            await Entities.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            if (saveNow)
+                await DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+            return entity;
+
+        }
         public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
             Assert.NotNull(entities, nameof(entities));
@@ -181,7 +190,7 @@ namespace Data.Repositories
             var reference = DbContext.Entry(entity).Reference(referenceProperty);
             if (!reference.IsLoaded)
                 reference.Load();
-        }
+        } 
         #endregion
     }
 }
