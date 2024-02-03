@@ -9,6 +9,7 @@ namespace NewsBot.Mappings
         public MappingProfile()
         {
             CreateMap<NewsViewModel,News>().ReverseMap();
+            CreateMap<NewsUpdateViewModel,News>().ReverseMap();
         }
     }
 }

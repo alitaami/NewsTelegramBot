@@ -1,4 +1,5 @@
-﻿using Data.Repositories;
+﻿using AutoMapper;
+using Data.Repositories;
 using Microsoft.Win32.SafeHandles;
 using NewsBot.Common.Resources;
 using NewsBot.Entities;
@@ -14,8 +15,11 @@ namespace NewsBot.Services
         private IRepository<News> _newsRepo;
         private IRepository<NewsKeyWord> _newskeyRepo;
         private IRepository<KeyWord> _keyRepo;
-        public NewsService(ILogger<NewsService> logger, IRepository<News> newsRepo, IRepository<NewsKeyWord> newskeyRepo, IRepository<KeyWord> keyRepo) : base(logger)
+        IMapper _mapper;
+        public NewsService(
+            IMapper mapper, ILogger<NewsService> logger, IRepository<News> newsRepo, IRepository<NewsKeyWord> newskeyRepo, IRepository<KeyWord> keyRepo) : base(logger)
         {
+            _mapper = mapper;
             _newsRepo = newsRepo;
             _newskeyRepo = newskeyRepo;
             _keyRepo = keyRepo;
@@ -79,12 +83,10 @@ namespace NewsBot.Services
         {
             try
             {
-                var data = await _newsRepo.AddAsync2(new News()
-                {
-                    MessageId = 0,
-                    Title = model.Title,
-                    Description = model.Description
-                }
+                var news = _mapper.Map<News>(model);
+
+                var data = await _newsRepo.AddAsync2(
+                  news
                 , cancellationToken);
 
                 return Ok(data);
@@ -102,12 +104,14 @@ namespace NewsBot.Services
             {
                 var obj = await _newsRepo.GetByIdAsync(cancellationToken, model.Id);
 
-                obj.Title = model.Title;
-                obj.Description = model.Description;
+                if (obj is null)
+                    return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
-                await _newsRepo.UpdateAsync(obj, cancellationToken);
+                _mapper.Map(model, obj);
 
-                return Ok();
+                 await _newsRepo.UpdateAsync(obj, cancellationToken);
+
+                return Ok(model);
             }
             catch (Exception ex)
             {
