@@ -37,6 +37,15 @@ namespace NewsBot.Services
                 if (obj is null)
                     return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
+                var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == id).ToList();
+
+                foreach(var keyword in keywords)
+                {
+                    await _newskeyRepo.DeleteAsync(keyword, cancellationToken);
+                }
+
+                await _bot.DeleteMessageAsync("@NewsTestChannel1", obj.MessageId);
+
                 await _newsRepo.DeleteAsync(obj, cancellationToken);
 
                 return Ok();
