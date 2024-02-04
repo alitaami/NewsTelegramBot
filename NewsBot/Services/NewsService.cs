@@ -8,6 +8,7 @@ using NewsBot.Models.Entities;
 using NewsBot.Models.ViewModels;
 using NewsBot.Services.Interfaces;
 using Telegram.Bot;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace NewsBot.Services
 {
@@ -39,7 +40,7 @@ namespace NewsBot.Services
 
                 var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == id).ToList();
 
-                foreach(var keyword in keywords)
+                foreach (var keyword in keywords)
                 {
                     await _newskeyRepo.DeleteAsync(keyword, cancellationToken);
                 }
@@ -97,7 +98,7 @@ namespace NewsBot.Services
             {
                 var news = _mapper.Map<News>(model);
 
-                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n\n";
+                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n";
 
                 if (model.KeyWords.Count > 0)
                 {
@@ -120,7 +121,7 @@ namespace NewsBot.Services
                 }
 
                 var message =
-                    await _bot.SendTextMessageAsync("@NewsTestChannel1", text);
+                    await _bot.SendTextMessageAsync("@NewsTestChannel1", text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
                 model.MessageId = message.MessageId;
 
@@ -141,14 +142,45 @@ namespace NewsBot.Services
         {
             try
             {
-                var obj = await _newsRepo.GetByIdAsync(cancellationToken, model.Id);
+                var news = await _newsRepo.GetByIdAsync(cancellationToken, model.Id);
 
-                if (obj is null)
+                if (news is null)
                     return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
-                _mapper.Map(model, obj);
+                var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == model.Id).ToList();
+                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n";
 
-                await _newsRepo.UpdateAsync(obj, cancellationToken);
+                _mapper.Map(model, news);
+
+                if (model.KeyWords.Count > 0)
+                {
+                    foreach (var keyword in keywords)
+                    {
+                        await _newskeyRepo.DeleteAsync(keyword, cancellationToken);
+                    }
+
+                    // because it was null, when we mapped that 
+                    news.NewsKeyWords = new List<NewsKeyWord>();
+
+                    foreach (int id in model.KeyWords)
+                    {
+                        var keyWord = await _keyRepo.GetByIdAsync(cancellationToken, id);
+
+                        if (keyWord is null)
+                            continue;
+
+                        text += $"{keyWord.Title}";
+                        news.NewsKeyWords.Add(new NewsKeyWord
+                        {
+                            KeyWordId = keyWord.Id
+                        });
+                    }
+                }
+
+                await _bot.EditMessageTextAsync("@NewsTestChannel1", news.MessageId, text,parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
+                await _bot.SendTextMessageAsync("@NewsTestChannel1", "این خبر بروزرسانی شد",replyToMessageId:news.MessageId);
+
+                await _newsRepo.UpdateAsync(news, cancellationToken);
 
                 return Ok(model);
             }
