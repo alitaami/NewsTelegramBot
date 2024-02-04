@@ -7,6 +7,7 @@ using NewsBot.Models.Base;
 using NewsBot.Models.Entities;
 using NewsBot.Models.ViewModels;
 using NewsBot.Services.Interfaces;
+using Telegram.Bot;
 
 namespace NewsBot.Services
 {
@@ -16,9 +17,11 @@ namespace NewsBot.Services
         private IRepository<NewsKeyWord> _newskeyRepo;
         private IRepository<KeyWord> _keyRepo;
         IMapper _mapper;
+        private readonly TelegramBotClient _bot;
         public NewsService(
-            IMapper mapper, ILogger<NewsService> logger, IRepository<News> newsRepo, IRepository<NewsKeyWord> newskeyRepo, IRepository<KeyWord> keyRepo) : base(logger)
+           TelegramBotClient bot, IMapper mapper, ILogger<NewsService> logger, IRepository<News> newsRepo, IRepository<NewsKeyWord> newskeyRepo, IRepository<KeyWord> keyRepo) : base(logger)
         {
+            _bot = new TelegramBotClient("6644956180:AAFN_eBw1BBknqz2UhjvTYxOMSm8d1NmH8w");
             _mapper = mapper;
             _newsRepo = newsRepo;
             _newskeyRepo = newskeyRepo;
@@ -85,9 +88,36 @@ namespace NewsBot.Services
             {
                 var news = _mapper.Map<News>(model);
 
+                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n\n";
+
+                if (model.KeyWords.Count > 0)
+                {
+                    // because it was null, when we mapped that 
+                    news.NewsKeyWords = new List<NewsKeyWord>();
+
+                    foreach (int id in model.KeyWords)
+                    {
+                        var keyWord = await _keyRepo.GetByIdAsync(cancellationToken, id);
+
+                        if (keyWord is null)
+                            continue;
+
+                        text += $"{keyWord.Title}";
+                        news.NewsKeyWords.Add(new NewsKeyWord
+                        {
+                            KeyWordId = keyWord.Id
+                        });
+                    }
+                }
+
+                var message =
+                    await _bot.SendTextMessageAsync("@NewsTestChannel1", text);
+
+                model.MessageId = message.MessageId;
+
                 var data = await _newsRepo.AddAsync2(
-                  news
-                , cancellationToken);
+                    news
+                  , cancellationToken);
 
                 return Ok(data);
             }
@@ -109,7 +139,7 @@ namespace NewsBot.Services
 
                 _mapper.Map(model, obj);
 
-                 await _newsRepo.UpdateAsync(obj, cancellationToken);
+                await _newsRepo.UpdateAsync(obj, cancellationToken);
 
                 return Ok(model);
             }
