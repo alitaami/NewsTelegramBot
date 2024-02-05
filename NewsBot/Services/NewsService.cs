@@ -98,7 +98,7 @@ namespace NewsBot.Services
             {
                 var news = _mapper.Map<News>(model);
 
-                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n";
+                string text = $"<b><i>{model.Title}</i></b>\n{model.Description}\n\n";
 
                 if (model.KeyWords.Count > 0)
                 {
@@ -121,9 +121,9 @@ namespace NewsBot.Services
                 }
 
                 var message =
-                    await _bot.SendTextMessageAsync("@NewsTestChannel1", text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
+                    await _bot.SendTextMessageAsync(chatId:"@NewsTestChannel1", text: text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
-                model.MessageId = message.MessageId;
+                news.MessageId = message.MessageId;
 
                 var data = await _newsRepo.AddAsync2(
                     news
@@ -148,7 +148,7 @@ namespace NewsBot.Services
                     return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
                 var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == model.Id).ToList();
-                string text = $"<b><i>{model.Title}<i/><b/>\n{model.Description}\n\n";
+                string text = $"<b><i>{model.Title}</i></b>\n{model.Description}\n\n";
 
                 _mapper.Map(model, news);
 
