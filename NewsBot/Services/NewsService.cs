@@ -22,7 +22,7 @@ namespace NewsBot.Services
         public NewsService(
            TelegramBotClient bot, IMapper mapper, ILogger<NewsService> logger, IRepository<News> newsRepo, IRepository<NewsKeyWord> newskeyRepo, IRepository<KeyWord> keyRepo) : base(logger)
         {
-            _bot = new TelegramBotClient("6644956180:AAFN_eBw1BBknqz2UhjvTYxOMSm8d1NmH8w");
+            _bot = bot;
             _mapper = mapper;
             _newsRepo = newsRepo;
             _newskeyRepo = newskeyRepo;
