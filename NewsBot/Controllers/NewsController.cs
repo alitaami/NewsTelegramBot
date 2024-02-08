@@ -35,7 +35,7 @@ namespace YourNamespace.Controllers
             try
             {
                 var result = await _newsService.GetNews(cancellationToken);
-                return Ok(result);
+                return APIResponse(result);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace YourNamespace.Controllers
             try
             {
                 var result = await _newsService.GetNewsById(id, cancellationToken);
-                return Ok(result);
+                return APIResponse(result);
             }
             catch (Exception ex)
             {
@@ -73,7 +73,7 @@ namespace YourNamespace.Controllers
             try
             {
                 var result = await _newsService.PostNews(model, cancellationToken);
-                return Ok(result);
+                return APIResponse(result);
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace YourNamespace.Controllers
             {
                 model.Id = id; // Assuming the id is also provided in the request body
                 var result = await _newsService.UpdateNews(model, cancellationToken);
-                return Ok(result);
+                return APIResponse(result);
             }
             catch (Exception ex)
             {
@@ -112,7 +112,7 @@ namespace YourNamespace.Controllers
             try
             {
                 var result = await _newsService.DeleteNews(id, cancellationToken);
-                return Ok(result);
+                return APIResponse(result);
             }
             catch (Exception ex)
             {

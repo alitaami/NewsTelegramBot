@@ -19,11 +19,11 @@ public class APIControllerBase : ControllerBase
 
         else if (serviceResult.Result.HttpStatusCode == (int)HttpStatusCode.BadRequest)
         {
-            return BadRequest(serviceResult.Result);
+            return BadRequest(serviceResult);
         }
         else if (serviceResult.Result.HttpStatusCode == (int)HttpStatusCode.NotFound)
         {
-            return NotFound(serviceResult.Result);
+            return NotFound(serviceResult);
         }
         else if (serviceResult.Result.HttpStatusCode == (int)HttpStatusCode.InternalServerError)
         {
@@ -60,5 +60,5 @@ public class APIControllerBase : ControllerBase
     private ApiResult CreateInternalErrorResult(ErrorCodeEnum error, string? message)
     {
         return new ApiResult(HttpStatusCode.InternalServerError, error, message, null);
-    } 
+    }
 }

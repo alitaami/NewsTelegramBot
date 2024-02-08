@@ -36,7 +36,7 @@ namespace NewsBot.Services
                 var obj = await _newsRepo.GetByIdAsync(cancellationToken, id);
 
                 if (obj is null)
-                    return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
+                    return NotFound(ErrorCodeEnum.NotFound, Resource.NotFound, null);///
 
                 var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == id).ToList();
 
@@ -53,8 +53,7 @@ namespace NewsBot.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, null, null);
-                return InternalServerError(ErrorCodeEnum.InternalError, Resource.GeneralErrorTryAgain, null);
+              return  HandleException(ex);
             }
         }
 
@@ -68,8 +67,7 @@ namespace NewsBot.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, null, null);
-                return InternalServerError(ErrorCodeEnum.InternalError, Resource.GeneralErrorTryAgain, null);
+                return HandleException(ex);
             }
         }
 
@@ -81,14 +79,13 @@ namespace NewsBot.Services
                 var res = await _newsRepo.GetByIdAsync(cancellationToken, id);
 
                 if (res is null)
-                    return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
+                    return NotFound(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
                 return Ok(res);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, null, null);
-                return InternalServerError(ErrorCodeEnum.InternalError, Resource.GeneralErrorTryAgain, null);
+                return HandleException(ex);
             }
         }
 
@@ -121,7 +118,7 @@ namespace NewsBot.Services
                 }
 
                 var message =
-                    await _bot.SendTextMessageAsync(chatId:"@NewsTestChannel1", text: text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
+                    await _bot.SendTextMessageAsync(chatId: "@NewsTestChannel1", text: text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
                 news.MessageId = message.MessageId;
 
@@ -133,8 +130,7 @@ namespace NewsBot.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, null, null);
-                return InternalServerError(ErrorCodeEnum.InternalError, Resource.GeneralErrorTryAgain, null);
+                return HandleException(ex);
             }
         }
 
@@ -145,7 +141,7 @@ namespace NewsBot.Services
                 var news = await _newsRepo.GetByIdAsync(cancellationToken, model.Id);
 
                 if (news is null)
-                    return BadRequest(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
+                    return NotFound(ErrorCodeEnum.BadRequest, Resource.NotFound, null);///
 
                 var keywords = _newskeyRepo.TableNoTracking.Where(k => k.NewsId == model.Id).ToList();
                 string text = $"<b><i>{model.Title}</i></b>\n{model.Description}\n\n";
@@ -177,8 +173,8 @@ namespace NewsBot.Services
                     }
                 }
 
-                await _bot.EditMessageTextAsync("@NewsTestChannel1", news.MessageId, text,parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
-                await _bot.SendTextMessageAsync("@NewsTestChannel1", "این خبر بروزرسانی شد",replyToMessageId:news.MessageId);
+                await _bot.EditMessageTextAsync("@NewsTestChannel1", news.MessageId, text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
+                await _bot.SendTextMessageAsync("@NewsTestChannel1", "این خبر بروزرسانی شد", replyToMessageId: news.MessageId);
 
                 await _newsRepo.UpdateAsync(news, cancellationToken);
 
@@ -186,8 +182,7 @@ namespace NewsBot.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, null, null);
-                return InternalServerError(ErrorCodeEnum.InternalError, Resource.GeneralErrorTryAgain, null);
+                return HandleException(ex);
             }
         }
     }
