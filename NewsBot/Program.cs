@@ -63,6 +63,7 @@ builder.Services.AddDbContext<NewsContext>(options =>
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var mapperConfig = new MapperConfiguration(mc =>
 {
