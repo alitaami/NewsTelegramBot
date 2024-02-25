@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Data.Repositories;
 using NewsBot.Entities;
+using NewsBot.Enums;
 using NewsBot.Models.Base;
 using NewsBot.Models.Entities;
 using NewsBot.Services.Interfaces;
@@ -12,16 +13,18 @@ namespace NewsBot.Services
     public class UserService : ServiceBase<UserService>, IUserService
     {
         private IRepository<Entities.User> _Repo;
+        private IRepository<Entities.UserActivity> _RepoAc;
         IMapper _mapper;
         private readonly TelegramBotClient _bot;
         public UserService(
-           TelegramBotClient bot, IMapper mapper, ILogger<UserService> logger, IRepository<Entities.User> Repo) : base(logger)
+           TelegramBotClient bot, IMapper mapper, ILogger<UserService> logger, IRepository<Entities.UserActivity> repoAc, IRepository<Entities.User> Repo) : base(logger)
         {
             _bot = bot;
             _mapper = mapper;
+            _RepoAc = repoAc;
             _Repo = Repo;
         }
-        public async Task<ServiceResult> CheckUserBychatId(long chatId, Update update, CancellationToken cancellationToken)
+        public async Task<ServiceResult> CheckUserBychatId(long chatId, Update update, ActivityType type, CancellationToken cancellationToken)
         {
             try
             {
@@ -40,6 +43,11 @@ namespace NewsBot.Services
                         UserType = Enums.UserType.Guest,
                         ParentId = null
                     }, cancellationToken);
+                    await _RepoAc.AddAsync2(new UserActivity
+                    {
+                        ActivityType = type,
+                        UserId = user.Id
+                    },cancellationToken);
                 }
 
                 return Ok(user);

@@ -1,5 +1,7 @@
 ﻿using FarzamNews.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using NewsBot.Entities;
+using NewsBot.Enums;
 using NewsBot.Services.Interfaces;
 using Newtonsoft.Json;
 using Telegram.Bot;
@@ -48,16 +50,28 @@ namespace NewsBot.Controllers
 
                 if (text == DefaultContents.Start)
                 {
-                    await _user.CheckUserBychatId(chatId, update, CancellationToken.None);
+                    await _user.CheckUserBychatId(chatId, update,ActivityType.StartBot, CancellationToken.None);
                     await _bot.SendTextMessageAsync(chatId, DefaultContents.WelcomeToBot, replyMarkup: Buttons.GenerateMainKeyboard());
                 }
-                else if(text == DefaultContents.Location)
+                else if (text == DefaultContents.Location)
                 {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetLocation, CancellationToken.None);
                     await _bot.SendVenueAsync(chatId, 45.87654, 56.76543, "دفتر مرکزی", "خیابان ایکس پلاک 2");
                 }
                 else if (text == DefaultContents.ContactUs)
                 {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetContact, CancellationToken.None);
                     await _bot.SendTextMessageAsync(chatId, DefaultContents.ContactUsMessage);
+                }
+                else if (text == DefaultContents.Money)
+                {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetMoneyNews, CancellationToken.None);
+                    await _bot.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage);
+                }
+                else if(text == DefaultContents.Profile)
+                {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.StartBot, CancellationToken.None);
+
                 }
             }
             return Ok();
