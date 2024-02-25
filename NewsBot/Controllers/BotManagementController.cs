@@ -49,8 +49,15 @@ namespace NewsBot.Controllers
                 if (text == DefaultContents.Start)
                 {
                     await _user.CheckUserBychatId(chatId, update, CancellationToken.None);
-
                     await _bot.SendTextMessageAsync(chatId, DefaultContents.WelcomeToBot, replyMarkup: Buttons.GenerateMainKeyboard());
+                }
+                else if(text == DefaultContents.Location)
+                {
+                    await _bot.SendVenueAsync(chatId, 45.87654, 56.76543, "دفتر مرکزی", "خیابان ایکس پلاک 2");
+                }
+                else if (text == DefaultContents.ContactUs)
+                {
+                    await _bot.SendTextMessageAsync(chatId, DefaultContents.ContactUsMessage);
                 }
             }
             return Ok();

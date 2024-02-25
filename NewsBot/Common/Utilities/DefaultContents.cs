@@ -12,8 +12,7 @@ namespace FarzamNews.Utilities
         public static readonly string Location = "\U0001F4CC آدرس دفتر مرکزی \U0001F4CC".CleanString();
         public static readonly string ContactUs = "\U0001F4E7 پل های ارتباطی \U0001F4E7".CleanString();
         public static readonly string Profile = "\U0001F464 پروفایل \U0001F464".CleanString();
-
-        public static readonly string ContactUsMessage = "\U0001F4E7: f_yamini72@yahoo.com\n\U0000260E: 09215488280".CleanString();
+        public static readonly string ContactUsMessage = "\U0001F4E7: alitaami81@gmail.com\n\U0000260E: 09301327634".CleanString();
         public static readonly string MoneyMessage = "دلار: 50,000 تومان\nیورو:53,000".CleanString();
     }
 }
