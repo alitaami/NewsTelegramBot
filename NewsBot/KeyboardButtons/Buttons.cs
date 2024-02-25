@@ -34,5 +34,35 @@ namespace Utilities.KeyboardButtons
 
             return keyboard;
         }
+        public static ReplyKeyboardMarkup GenerateProfileKeyboard()
+        {
+            var rows = new List<KeyboardButton[]>();
+
+            rows.Add(new KeyboardButton[] {
+                new KeyboardButton(DefaultContents.Search)
+             });
+
+            rows.Add(new KeyboardButton[]
+            {
+              new KeyboardButton(DefaultContents.HeadOfNews),
+              new KeyboardButton(DefaultContents.Money)
+
+            });
+            rows.Add(new KeyboardButton[]
+           {
+              new KeyboardButton(DefaultContents.Location),
+              new KeyboardButton(DefaultContents.ContactUs)
+
+           });
+            rows.Add(new KeyboardButton[]
+           {
+              new KeyboardButton(DefaultContents.Profile)
+
+           });
+            var keyboard = new ReplyKeyboardMarkup(rows);
+
+            return keyboard;
+
+        }
     }
 }

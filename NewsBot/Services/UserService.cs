@@ -47,15 +47,23 @@ namespace NewsBot.Services
                     {
                         ActivityType = type,
                         UserId = user.Id
-                    },cancellationToken);
+                    }, cancellationToken);
                 }
 
-                return Ok(user);
+                return Ok(user.Id);
             }
             catch (Exception ex)
             {
                 return HandleException(ex);
             }
+        }
+
+        public Entities.User GetUserById(object id, CancellationToken cancellationToken)
+        { 
+            var user = _Repo.TableNoTracking
+                            .Where(u => u.Id == Convert.ToInt32(id))
+                            .FirstOrDefault();
+            return user;  
         }
     }
 }

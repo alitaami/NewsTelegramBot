@@ -50,7 +50,7 @@ namespace NewsBot.Controllers
 
                 if (text == DefaultContents.Start)
                 {
-                    await _user.CheckUserBychatId(chatId, update,ActivityType.StartBot, CancellationToken.None);
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.StartBot, CancellationToken.None);
                     await _bot.SendTextMessageAsync(chatId, DefaultContents.WelcomeToBot, replyMarkup: Buttons.GenerateMainKeyboard());
                 }
                 else if (text == DefaultContents.Location)
@@ -68,9 +68,11 @@ namespace NewsBot.Controllers
                     await _user.CheckUserBychatId(chatId, update, ActivityType.GetMoneyNews, CancellationToken.None);
                     await _bot.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage);
                 }
-                else if(text == DefaultContents.Profile)
+                else if (text == DefaultContents.Profile)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.StartBot, CancellationToken.None);
+                    var userId = await _user.CheckUserBychatId(chatId, update, ActivityType.Profile, CancellationToken.None);
+                    var user = _user.GetUserById(userId.Data, CancellationToken.None);
+                    await _bot.SendTextMessageAsync(chatId, string.Format(DefaultContents.Profile, user.FirstName, user.LastName ?? "___", user.Username ?? "___"), replyMarkup:GenerateProfileKeyboard);
 
                 }
             }
