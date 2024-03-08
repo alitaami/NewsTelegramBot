@@ -2,6 +2,6 @@
 {
     public enum ActivityType
     {
-        StartBot,GetLocation,GetContact,GetMoneyNews,Profile
+        StartBot,GetLocation,GetContact,GetMoneyNews,Profile,MainMenu
     }
 }

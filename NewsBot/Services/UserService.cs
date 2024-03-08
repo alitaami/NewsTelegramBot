@@ -59,11 +59,11 @@ namespace NewsBot.Services
         }
 
         public Entities.User GetUserById(object id, CancellationToken cancellationToken)
-        { 
+        {
             var user = _Repo.TableNoTracking
                             .Where(u => u.Id == Convert.ToInt32(id))
                             .FirstOrDefault();
-            return user;  
-        }
+            return user;
+        } 
     }
 }

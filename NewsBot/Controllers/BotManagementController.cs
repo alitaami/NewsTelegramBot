@@ -72,7 +72,14 @@ namespace NewsBot.Controllers
                 {
                     var userId = await _user.CheckUserBychatId(chatId, update, ActivityType.Profile, CancellationToken.None);
                     var user = _user.GetUserById(userId.Data, CancellationToken.None);
-                    await _bot.SendTextMessageAsync(chatId, string.Format(DefaultContents.Profile, user.FirstName, user.LastName ?? "___", user.Username ?? "___"), replyMarkup:GenerateProfileKeyboard);
+                    await _bot.SendTextMessageAsync(chatId, string.Format(DefaultContents.Profile, user.FirstName, user.LastName ?? "___", user.Username ?? "___"), replyMarkup: Buttons.GenerateProfileKeyboard());
+
+                }
+                else if(text == DefaultContents.BackToMainMenu)
+                {
+                    var userId = await _user.CheckUserBychatId(chatId,update,ActivityType.MainMenu, CancellationToken.None);
+                    var user = _user.GetUserById(userId.Data, CancellationToken.None);
+                    await _bot.SendTextMessageAsync(chatId, DefaultContents.BackToMainMenu, replyMarkup: Buttons.GenerateMainKeyboard());
 
                 }
             }
