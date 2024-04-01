@@ -79,7 +79,7 @@ builder.Services.AddSwaggerGen();
 // Register the TelegramBotClient
 builder.Services.AddSingleton<TelegramBotClient>(provider =>
 {
-    var botToken = "6644956180:AAFN_eBw1BBknqz2UhjvTYxOMSm8d1NmH8w";
+    var botToken = "7125057765:AAF4UZKamrLrbTsA9aDqgLy_0pBLb8U5q7Y";
     return new TelegramBotClient(botToken);
 });
 
