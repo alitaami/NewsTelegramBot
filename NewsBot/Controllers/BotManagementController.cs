@@ -105,11 +105,11 @@ namespace NewsBot.Controllers
             };
 
             // Start receiving updates using long-polling
-            _bot.StartReceiving(updateHandler: HandleUpdateAsync,pollingErrorHandler: HandleErrorAsync , receivingOptions);
-            
+            _bot.StartReceiving(updateHandler: HandleUpdateAsync, pollingErrorHandler: HandleErrorAsync, receivingOptions);
+
             return Ok();
         }
-         
+
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update is null)
@@ -152,11 +152,21 @@ namespace NewsBot.Controllers
                     var user = _user.GetUserById(userId.Data, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.BackToMainMenu, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
                 }
+                else if (text == DefaultContents.EditFirstName)
+                {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.EditFirstName, cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstName);
+                }
+                else if (text == DefaultContents.EditFirstName)
+                {
+                    await _user.CheckUserBychatId(chatId, update, ActivityType.EditFirstName, cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstName);
+                } 
             }
         }
         private async Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
-        } 
+        }
     }
 }
