@@ -17,6 +17,7 @@ namespace NewsBot.Entities
 
         [ForeignKey(nameof(ParentId))]
         public User Parent { get; set; }
+        public ICollection<UserActivity> UserActivities { get; set; }
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using FarzamNews.Utilities;
+﻿using Data.Repositories;
+using FarzamNews.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using NewsBot.Entities;
 using NewsBot.Enums;
@@ -17,10 +18,12 @@ namespace NewsBot.Controllers
     {
         private readonly TelegramBotClient _bot;
         private readonly IUserService _user;
-        public BotManagementController(TelegramBotClient telegramBot, IUserService user)
+        private readonly IRepository<Entities.User> _userRepo;
+        public BotManagementController(IRepository<Entities.User> userRepo, TelegramBotClient telegramBot, IUserService user)
         {
             _bot = telegramBot;
             _user = user;
+            _userRepo = userRepo;
         }
         #region Webhook method
         //[HttpGet]
@@ -105,63 +108,126 @@ namespace NewsBot.Controllers
             };
 
             // Start receiving updates using long-polling
-            _bot.StartReceiving(updateHandler: HandleUpdateAsync, pollingErrorHandler: HandleErrorAsync, receivingOptions);
-
+           _bot.StartReceiving(updateHandler: HandleUpdateAsync, pollingErrorHandler: HandleErrorAsync, receivingOptions);
+           
             return Ok();
         }
-
+         
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update is null)
                 return;
 
-            if (update.Message != null)
+            if (update.CallbackQuery is not null)
+            {
+                var text = update.CallbackQuery.Data;
+                var chatId = update.CallbackQuery.From.Id;
+                var user = _userRepo.Table.Where(u => u.ChatId == chatId).FirstOrDefault();
+                if (user is null)
+                {
+                    user = await _userRepo.AddAsync2(new Entities.User()
+                    {
+                        ChatId = chatId,
+                        FirstName = update.Message.From.FirstName,
+                        LastName = update.Message.From.LastName,
+                        Username = update.Message.From.Username,
+                        UserType = Enums.UserType.Guest,
+                        ParentId = null,
+                        UserActivities = new List<Entities.UserActivity>()
+                        {
+                            new UserActivity(){ActivityType=ActivityType.StartBot}
+                        }
+                    }, cancellationToken);
+                }
+
+                var lastActivity = _user.LastActivity(user.Id);
+
+                if (text == "Canceled")
+                {
+                    await botClient.SendTextMessageAsync(chatId, DefaultContents.PleaseRetry);
+                }
+                else if (text.StartsWith("Confirmed_"))
+                {
+                    var value = text.Split("_")[1].ToString();
+
+                    user.FirstName = value;
+                    await _userRepo.UpdateAsync(user,cancellationToken);
+                }
+            }
+
+            if (update.Message is not null)
             {
                 var text = update.Message.Text;
                 var chatId = update.Message.Chat.Id;
+                var user = _userRepo.TableNoTracking.Where(u => u.ChatId == chatId).FirstOrDefault();
+
+                if (user is null)
+                {
+                    user = await _userRepo.AddAsync2(new Entities.User()
+                    {
+                        ChatId = chatId,
+                        FirstName = update.Message.From.FirstName,
+                        LastName = update.Message.From.LastName,
+                        Username = update.Message.From.Username,
+                        UserType = Enums.UserType.Guest,
+                        ParentId = null,
+                        UserActivities = new List<Entities.UserActivity>()
+                        {
+                            new UserActivity(){ActivityType=ActivityType.StartBot}
+                        }
+                    }, cancellationToken);
+                }
+
+                var lastActivity = _user.LastActivity(user.Id);
 
                 if (text == DefaultContents.Start)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.StartBot, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.StartBot, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.WelcomeToBot, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.Location)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetLocation, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.GetLocation, cancellationToken);
                     await botClient.SendVenueAsync(chatId, 45.87654, 56.76543, "دفتر مرکزی", "خیابان ایکس پلاک 2", cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.ContactUs)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetContact, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.GetContact, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.ContactUsMessage, cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.Money)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.GetMoneyNews, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.GetMoneyNews, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage, cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.Profile)
                 {
-                    var userId = await _user.CheckUserBychatId(chatId, update, ActivityType.Profile, cancellationToken);
-                    var user = _user.GetUserById(userId.Data, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.Profile, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, string.Format(DefaultContents.Profile, user.FirstName, user.LastName ?? "___", user.Username ?? "___"), replyMarkup: Buttons.GenerateProfileKeyboard(), cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.BackToMainMenu)
                 {
-                    var userId = await _user.CheckUserBychatId(chatId, update, ActivityType.MainMenu, cancellationToken);
-                    var user = _user.GetUserById(userId.Data, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.MainMenu, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.BackToMainMenu, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
                 }
                 else if (text == DefaultContents.EditFirstName)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.EditFirstName, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.EditFirstName, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstName);
                 }
                 else if (text == DefaultContents.EditFirstName)
                 {
-                    await _user.CheckUserBychatId(chatId, update, ActivityType.EditFirstName, cancellationToken);
+                    await _user.AddActivityLog(user.Id, ActivityType.EditFirstName, cancellationToken);
                     await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstName);
-                } 
+                }
+                else
+                {
+                    if (lastActivity.ActivityType is ActivityType.EditFirstName)
+                    {
+                        await _user.AddActivityLog(user.Id, ActivityType.GetEditFirstNameConfirmation, cancellationToken);
+                        await botClient.SendTextMessageAsync(chatId, DefaultContents.EditLastNameAlert, replyMarkup: Buttons.GenerateConfirmationKeyboard(text));
+                    }
+                }
             }
         }
         private async Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken cancellationToken)

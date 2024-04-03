@@ -6,8 +6,10 @@ using Telegram.Bot.Types;
 namespace NewsBot.Services.Interfaces
 {
     public interface IUserService
-    { 
-        Task<ServiceResult> CheckUserBychatId(long chatId, Update update, ActivityType type, CancellationToken cancellationToken);
-       Entities.User GetUserById(object id, CancellationToken cancellationToken);
+    {
+        Task<ServiceResult> AddActivityLog(int userId, ActivityType type, CancellationToken cancellationToken);
+        Entities.User GetUserById(object id, CancellationToken cancellationToken);
+        UserActivity LastActivity(int userId);
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 using NewsBot.Entities;
 using NewsBot.Enums;
 using NewsBot.Models.Base;
@@ -24,33 +25,18 @@ namespace NewsBot.Services
             _RepoAc = repoAc;
             _Repo = Repo;
         }
-        public async Task<ServiceResult> CheckUserBychatId(long chatId, Update update, ActivityType type, CancellationToken cancellationToken)
+        public async Task<ServiceResult> AddActivityLog(int userId, ActivityType type, CancellationToken cancellationToken)
         {
             try
             {
-                var user = _Repo.TableNoTracking
-                                .Where(u => u.ChatId == chatId)
-                                .FirstOrDefault();
-
-                if (user is null)
+                await _RepoAc.AddAsync2(new UserActivity
                 {
-                    user = await _Repo.AddAsync2(new Entities.User()
-                    {
-                        ChatId = chatId,
-                        FirstName = update.Message.From.FirstName,
-                        LastName = update.Message.From.LastName,
-                        Username = update.Message.From.Username,
-                        UserType = Enums.UserType.Guest,
-                        ParentId = null
-                    }, cancellationToken);
-                    await _RepoAc.AddAsync2(new UserActivity
-                    {
-                        ActivityType = type,
-                        UserId = user.Id
-                    }, cancellationToken);
-                }
+                    ActivityType = type,
+                    UserId = userId
+                }, cancellationToken);
 
-                return Ok(user.Id);
+
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -64,6 +50,17 @@ namespace NewsBot.Services
                             .Where(u => u.Id == Convert.ToInt32(id))
                             .FirstOrDefault();
             return user;
-        } 
+        }
+
+        public UserActivity LastActivity(int userId)
+        {
+            var activity = _RepoAc
+                           .TableNoTracking
+                           .Where(x=>x.UserId == userId)
+                           .OrderByDescending(x=>x.UserId)
+                           .FirstAsync();
+
+            return activity.Result;
+        }
     }
 }
