@@ -31,8 +31,8 @@ namespace FarzamNews.Utilities
         public static readonly string EditFirstNameAlert = "آیا نسبت به ویرایش نام خود اطمینان دارید؟".CleanString();
         public static readonly string EditLastNameAlert = "آیا نسبت به ویرایش نام خانوادگی خود اطمینان دارید؟".CleanString();
 
-        public static readonly string EditFirstNameMessage = "لطفا نام خود را وارد کنید".CleanString();
-        public static readonly string EditLastNameMessage = "لطفا نام خانوادگی خود را وارد کنید".CleanString();
+        public static readonly string EditFirstNameMessage = "لطفا نام خود را جهت تغییر وارد کنید".CleanString();
+        public static readonly string EditLastNameMessage = "لطفا نام خانوادگی خود را جهت تغییر وارد کنید".CleanString();
 
         public static readonly string EditFirstNameDoneMessage = "ویرایش نام با موفقیت انجام شد".CleanString();
         public static readonly string EditLastNameDoneMessage = "ویرایش نام خانوادگی با موفقیت انجام شد".CleanString();

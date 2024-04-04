@@ -163,6 +163,7 @@ namespace NewsBot.Controllers
 
                             user.FirstName = value;
                             await repository.UpdateAsync(user, cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstNameDoneMessage, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
                         }
                     }
 
