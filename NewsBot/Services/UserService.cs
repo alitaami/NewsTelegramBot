@@ -29,7 +29,7 @@ namespace NewsBot.Services
         {
             try
             {
-                await _RepoAc.AddAsync2(new UserActivity
+                await _RepoAc.AddAsync(new UserActivity
                 {
                     ActivityType = type,
                     UserId = userId
@@ -57,7 +57,7 @@ namespace NewsBot.Services
             var activity = _RepoAc
                            .TableNoTracking
                            .Where(x=>x.UserId == userId)
-                           .OrderByDescending(x=>x.UserId)
+                           .OrderByDescending(x=>x.Id)
                            .FirstAsync();
 
             return activity.Result;

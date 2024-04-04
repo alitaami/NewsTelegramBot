@@ -55,31 +55,28 @@ namespace Utilities.KeyboardButtons
         {
             var rows = new List<KeyboardButton[]>();
 
-            rows.Add(new KeyboardButton[] {
-                new KeyboardButton(DefaultContents.Search)
-             });
+            rows.Add(new KeyboardButton[]
+            {
+                new KeyboardButton(DefaultContents.EditFirstName)
+            });
 
             rows.Add(new KeyboardButton[]
             {
-              new KeyboardButton(DefaultContents.HeadOfNews),
-              new KeyboardButton(DefaultContents.Money)
-
+                new KeyboardButton(DefaultContents.EditLastName)
             });
-            rows.Add(new KeyboardButton[]
-           {
-              new KeyboardButton(DefaultContents.Location),
-              new KeyboardButton(DefaultContents.ContactUs)
 
-           });
             rows.Add(new KeyboardButton[]
-           {
-              new KeyboardButton(DefaultContents.Profile)
+            {
+                new KeyboardButton(DefaultContents.SavedNews)
+            });
 
-           });
+            rows.Add(new KeyboardButton[]
+            {
+                new KeyboardButton(DefaultContents.BackToMainMenu)
+            });
+
             var keyboard = new ReplyKeyboardMarkup(rows);
-
             return keyboard;
-
         }
     }
 }

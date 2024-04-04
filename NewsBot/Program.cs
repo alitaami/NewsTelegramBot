@@ -59,7 +59,9 @@ builder.Services
 
 // Add services to the container.
 builder.Services.AddDbContext<NewsContext>(options =>
-    options.UseSqlServer(connectionString: builder.Configuration.GetConnectionString("DbConnection")));
+    options.UseSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DbConnection")),
+        ServiceLifetime.Scoped); // Change ServiceLifetime.Transient to ServiceLifetime.Scoped
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<INewsService, NewsService>();

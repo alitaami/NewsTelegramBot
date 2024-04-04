@@ -122,7 +122,7 @@ namespace NewsBot.Services
 
                 news.MessageId = message.MessageId;
 
-                var data = await _newsRepo.AddAsync2(
+                var data = await _newsRepo.AddAsync(
                     news
                   , cancellationToken);
 
