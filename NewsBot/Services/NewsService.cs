@@ -121,6 +121,7 @@ namespace NewsBot.Services
                     await _bot.SendTextMessageAsync(chatId: "@NewsTestChannel1", text: text, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
                 news.MessageId = message.MessageId;
+                 news.CreatedDate = DateTime.Now;
 
                 var data = await _newsRepo.AddAsync(
                     news

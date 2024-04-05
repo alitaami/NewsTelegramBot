@@ -126,17 +126,19 @@ namespace NewsBot.Controllers
 
                 using (var scope = moserviceScopeFactory.CreateScope())
                 {
-                    var repository = scope.ServiceProvider.GetRequiredService<IRepository<Entities.User>>();
+                    var _repoUser = scope.ServiceProvider.GetRequiredService<IRepository<Entities.User>>();
+                    var _repoNews = scope.ServiceProvider.GetRequiredService<IRepository<Entities.News>>();
+                    var _repoNewsKeyword = scope.ServiceProvider.GetRequiredService<IRepository<Entities.NewsKeyWord>>();
                     var _user = scope.ServiceProvider.GetRequiredService<IUserService>();
 
                     if (update.CallbackQuery is not null)
                     {
                         var text = update.CallbackQuery.Data;
                         var chatId = update.CallbackQuery.From.Id;
-                        var user = await repository.Table.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
+                        var user = await _repoUser.Table.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
                         if (user is null)
                         {
-                            user = await repository.AddAsync(new Entities.User()
+                            user = await _repoUser.AddAsync(new Entities.User()
                             {
                                 ChatId = chatId,
                                 FirstName = update.Message.From.FirstName,
@@ -162,7 +164,7 @@ namespace NewsBot.Controllers
                             var value = text.Split("_")[1].ToString();
 
                             user.FirstName = value;
-                            await repository.UpdateAsync(user, cancellationToken);
+                            await _repoUser.UpdateAsync(user, cancellationToken);
                             await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstNameDoneMessage, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
                         }
                     }
@@ -172,11 +174,11 @@ namespace NewsBot.Controllers
 
                         var text = update.Message.Text;
                         var chatId = update.Message.Chat.Id;
-                        var user = await repository.Table.Where(u => u.ChatId == chatId).FirstOrDefaultAsync(cancellationToken);
+                        var user = await _repoUser.Table.Where(u => u.ChatId == chatId).FirstOrDefaultAsync(cancellationToken);
 
                         if (user is null)
                         {
-                            user = await repository.AddAsync(new Entities.User()
+                            user = await _repoUser.AddAsync(new Entities.User()
                             {
                                 ChatId = chatId,
                                 FirstName = update.Message.From.FirstName,
@@ -222,17 +224,66 @@ namespace NewsBot.Controllers
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.MainMenu, cancellationToken);
                             await botClient.SendTextMessageAsync(chatId, DefaultContents.BackToMainMenuMessage, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
-                        } 
+                        }
                         else if (text == DefaultContents.EditFirstName)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.EditFirstName, cancellationToken);
                             await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstNameMessage);
                         }
+                        else if (text == DefaultContents.HeadOfNews)
+                        {
+                            await _user.AddActivityLog(user.Id, ActivityType.GetHeadOfNews, cancellationToken);
+                            var message = $"سر تیتر اخبار امروز {DateTime.Now.ToShortDateString()}";
+                            var today = DateTime.Now.Date;
+                            var news = await _repoNews.TableNoTracking.Where(n => n.CreatedDate.Date == today).Select(n => new
+                            {
+                                n.Id,
+                                n.Title
+                            }).Take(10)
+                              .ToListAsync();
+
+                            for (int i = 0; i < news.Count(); i++)
+                            {
+                                message += $"{i + 1} - {news[i].Title}  /News_{news[i].Id}\n";
+                            }
+                            await botClient.SendTextMessageAsync(chatId, message);
+                        }
                         else
                         {
-                            if (lastActivity.ActivityType is ActivityType.EditFirstName)
+                            if (text.StartsWith("/News_"))
+                            {
+                                int newsId = 0;
+                                if (int.TryParse(text.Split("_")[1], out newsId))
+                                {
+                                    var news = await _repoNews.GetByIdAsync(cancellationToken, newsId);
+
+                                    if (news is null)
+                                    {
+                                        await botClient.SendTextMessageAsync(chatId, DefaultContents.NewsNotFound);
+                                        return Ok();
+                                    }
+
+                                    var newsKeywords = await _repoNewsKeyword.TableNoTracking.Where(n => n.NewsId == newsId).Include(n => n.KeyWord).ToListAsync();
+
+                                    string message = $"<b><i>{news.Title}</i></b>\n{news.Description}\n\n";
+
+                                    if (newsKeywords.Count > 0)
+                                    {
+                                        foreach (var item in newsKeywords)
+                                        {
+                                            message += $"{item.KeyWord.Title}";
+                                        }
+                                        await botClient.SendTextMessageAsync(chatId, message, (int?)ParseMode.Html);
+                                    }
+                                    else
+                                        await botClient.SendTextMessageAsync(chatId,  DefaultContents.MessageIsNotValid);
+
+                                }
+                            }
+                            if (lastActivity.ActivityType is ActivityType.EditFirstName || lastActivity.ActivityType is ActivityType.GetEditFirstNameConfirmation)
                             {
                                 await _user.AddActivityLog(user.Id, ActivityType.GetEditFirstNameConfirmation, cancellationToken);
+
                                 await botClient.SendTextMessageAsync(chatId, DefaultContents.EditLastNameAlert, replyMarkup: Buttons.GenerateConfirmationKeyboard(text));
                             }
                         }
