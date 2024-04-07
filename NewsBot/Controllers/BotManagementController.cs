@@ -173,7 +173,7 @@ namespace NewsBot.Controllers
                     {
 
                         var text = update.Message.Text;
-                        var chatId = update.Message.Chat.Id;
+                        long chatId = update.Message.Chat.Id;
                         var user = await _repoUser.Table.Where(u => u.ChatId == chatId).FirstOrDefaultAsync(cancellationToken);
 
                         if (user is null)
@@ -233,25 +233,24 @@ namespace NewsBot.Controllers
                         else if (text == DefaultContents.HeadOfNews)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.GetHeadOfNews, cancellationToken);
-                            var message = $"سر تیتر اخبار امروز {DateTime.Now.ToShortDateString()}";
                             var today = DateTime.Now.Date;
-                            var news = await _repoNews.TableNoTracking.Where(n => n.CreatedDate.Date == today).Select(n => new
-                            {
-                                n.Id,
-                                n.Title
-                            }).Take(10)
-                              .ToListAsync();
+                            var items = await _repoNews.TableNoTracking.Where(x => x.CreatedDate.Date == today).Select(x => new { x.Id, x.Title }).Take(10).ToListAsync();
 
-                            for (int i = 0; i < news.Count(); i++)
-                            {
-                                message += $"{i + 1} - {news[i].Title}  /News_{news[i].Id}\n";
-                            }
-                            await botClient.SendTextMessageAsync(chatId, message);
+                            var message = $"سرتیتر اخبار امروز {today.ToShortDateString()}\n";
+                            for (int i = 0; i < items.Count(); i++)
+                                message += $"{i + 1} - {items[i].Title}   /News_{items[i].Id}\n";
+
+                            await _bot.SendTextMessageAsync(chatId, message);
+                        }
+                        else if(text == DefaultContents.Search)
+                        {
+                            await _user.AddActivityLog(user.Id, ActivityType.Search, cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, DefaultContents.PleaseEnterYourText);
                         }
                         else
                         {
                             if (text.StartsWith("/News_"))
-                            {
+                            { 
                                 int newsId = 0;
                                 if (int.TryParse(text.Split("_")[1], out newsId))
                                 {
@@ -271,20 +270,38 @@ namespace NewsBot.Controllers
                                     {
                                         foreach (var item in newsKeywords)
                                         {
-                                            message += $"{item.KeyWord.Title}";
+                                            message += $"#{item.KeyWord.Title} ";
                                         }
-                                        await botClient.SendTextMessageAsync(chatId, message, (int?)ParseMode.Html);
+                                        await botClient.SendTextMessageAsync( chatId, message, parseMode: ParseMode.Html);
                                     }
                                     else
                                         await botClient.SendTextMessageAsync(chatId,  DefaultContents.MessageIsNotValid);
 
                                 }
                             }
-                            if (lastActivity.ActivityType is ActivityType.EditFirstName || lastActivity.ActivityType is ActivityType.GetEditFirstNameConfirmation)
+                           else if (lastActivity.ActivityType is ActivityType.EditFirstName || lastActivity.ActivityType is ActivityType.GetEditFirstNameConfirmation)
                             {
                                 await _user.AddActivityLog(user.Id, ActivityType.GetEditFirstNameConfirmation, cancellationToken);
 
                                 await botClient.SendTextMessageAsync(chatId, DefaultContents.EditLastNameAlert, replyMarkup: Buttons.GenerateConfirmationKeyboard(text));
+                            }
+                            else if(lastActivity.ActivityType is ActivityType.Search)
+                            {
+                                await _user.AddActivityLog(  user.Id, ActivityType.ShowSearchResult , cancellationToken);
+
+                                var news = await _repoNews
+                                          .TableNoTracking
+                                          .Include(n => n.NewsKeyWords)
+                                          .ThenInclude(n => n.KeyWord)
+                                          .Where(n => n.Title.Contains(text) || n.NewsKeyWords.Any(z => z.KeyWord.Title == text))
+                                          .ToListAsync();
+
+
+                                var message = $"نتایج جستجو\n";
+                                for (int i = 0; i < news.Count(); i++)
+                                    message += $"{i + 1} - {news[i].Title}   /News_{news[i].Id}\n";
+
+                                await _bot.SendTextMessageAsync(chatId, message);
                             }
                         }
 
