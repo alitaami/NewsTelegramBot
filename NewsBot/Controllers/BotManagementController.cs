@@ -97,23 +97,29 @@ namespace NewsBot.Controllers
         [HttpGet]
         public async Task<ActionResult> SetBotConnection()
         {
-
-            // configs for receiving options 
-            var receivingOptions = new ReceiverOptions()
+            try
             {
-                AllowedUpdates = new UpdateType[]
+                // configs for receiving options 
+                var receivingOptions = new ReceiverOptions()
                 {
+                    AllowedUpdates = new UpdateType[]
+                    {
                  UpdateType.Message,
                  UpdateType.CallbackQuery,
                  UpdateType.Poll,
                  UpdateType.PollAnswer
-                }
-            };
+                    }
+                };
 
-            // Start receiving updates using long-polling
-            _bot.StartReceiving(updateHandler: HandleUpdateAsync, pollingErrorHandler: HandleErrorAsync, receivingOptions);
+                // Start receiving updates using long-polling
+                _bot.StartReceiving(updateHandler: HandleUpdateAsync, pollingErrorHandler: HandleErrorAsync, receivingOptions);
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         [HttpGet]
@@ -129,6 +135,7 @@ namespace NewsBot.Controllers
                     var _repoUser = scope.ServiceProvider.GetRequiredService<IRepository<Entities.User>>();
                     var _repoNews = scope.ServiceProvider.GetRequiredService<IRepository<Entities.News>>();
                     var _repoNewsKeyword = scope.ServiceProvider.GetRequiredService<IRepository<Entities.NewsKeyWord>>();
+                    var _repoUserCollection = scope.ServiceProvider.GetRequiredService<IRepository<Entities.NewsUserCollection>>();
                     var _user = scope.ServiceProvider.GetRequiredService<IUserService>();
 
                     if (update.CallbackQuery is not null)
@@ -166,6 +173,78 @@ namespace NewsBot.Controllers
                             user.FirstName = value;
                             await _repoUser.UpdateAsync(user, cancellationToken);
                             await botClient.SendTextMessageAsync(chatId, DefaultContents.EditFirstNameDoneMessage, replyMarkup: Buttons.GenerateMainKeyboard(), cancellationToken: cancellationToken);
+                        }
+                        else if (text.StartsWith($"Save_"))
+                        {
+                            int newsId = 0;
+                            if (int.TryParse(text.Split("_")[1], out newsId))
+                            {
+                                var news = await _repoNews.GetByIdAsync(cancellationToken, newsId);
+
+                                if (news is null)
+                                {
+                                    await botClient.SendTextMessageAsync(chatId, DefaultContents.NewsNotFound);
+                                    return Ok();
+                                }
+
+                                await _repoUserCollection.AddAsync(new NewsUserCollection()
+                                {
+                                    UserId = user.Id,
+                                    NewsId = newsId
+                                }, cancellationToken);
+
+                                var newsKeywords = await _repoNewsKeyword.TableNoTracking.Where(n => n.NewsId == newsId).Include(n => n.KeyWord).ToListAsync();
+
+                                string message = $"<b><i>{news.Title}</i></b>\n{news.Description}\n\n";
+
+                                if (newsKeywords.Count > 0)
+                                {
+                                    foreach (var item in newsKeywords)
+                                    {
+                                        message += $"#{item.KeyWord.Title} ";
+                                    }
+                                    await _bot.EditMessageTextAsync(chatId, update.CallbackQuery.Message.MessageId, message, parseMode: ParseMode.Html, replyMarkup: Buttons.GenerateNewsKeyboard(newsId, true));
+                                }
+                                else
+                                    await botClient.SendTextMessageAsync(chatId, DefaultContents.MessageIsNotValid);
+
+                            }
+                        }
+                        else if (text.StartsWith($"UnSave_"))
+                        {
+                            int newsId = 0;
+                            if (int.TryParse(text.Split("_")[1], out newsId))
+                            {
+                                var news = await _repoNews.GetByIdAsync(cancellationToken, newsId);
+
+                                if (news is null)
+                                {
+                                    await botClient.SendTextMessageAsync(chatId, DefaultContents.NewsNotFound);
+                                    return Ok();
+                                }
+
+                                var newsKeywords = await _repoNewsKeyword.TableNoTracking.Where(n => n.NewsId == newsId).Include(n => n.KeyWord).ToListAsync();
+                                var obj = await _repoUserCollection.TableNoTracking.Where(n => n.UserId == user.Id && n.NewsId == newsId).FirstOrDefaultAsync();
+                                if (obj is not null)
+                                {
+                                    await _repoUserCollection.DeleteAsync(obj, cancellationToken);
+                                }
+                                string message = $"<b><i>{news.Title}</i></b>\n{news.Description}\n\n";
+
+                                if (newsKeywords.Count > 0)
+                                {
+                                    foreach (var item in newsKeywords)
+                                    {
+                                        message += $"#{item.KeyWord.Title} ";
+                                    }
+
+
+                                    await _bot.EditMessageTextAsync(chatId, update.CallbackQuery.Message.MessageId, message, parseMode: ParseMode.Html, replyMarkup: Buttons.GenerateNewsKeyboard(newsId, false));
+                                }
+                                else
+                                    await botClient.SendTextMessageAsync(chatId, DefaultContents.MessageIsNotValid);
+
+                            }
                         }
                     }
 
@@ -242,15 +321,29 @@ namespace NewsBot.Controllers
 
                             await _bot.SendTextMessageAsync(chatId, message);
                         }
-                        else if(text == DefaultContents.Search)
+                        else if (text == DefaultContents.Search)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.Search, cancellationToken);
                             await botClient.SendTextMessageAsync(chatId, DefaultContents.PleaseEnterYourText);
                         }
+                        else if (text == DefaultContents.SavedNews)
+                        {
+                            var items = await _repoUserCollection.TableNoTracking.Where(x => x.UserId == user.Id).Include(x => x.News).Select(x => new { x.NewsId, x.News.Title }).Take(10).ToListAsync();
+
+                            if (items.Count is 0)
+                            {
+                                await _bot.SendTextMessageAsync(chatId, DefaultContents.EmptySavedNews);
+                            }
+                            var message = $"اخبار ذخیره شده  \n";
+                            for (int i = 0; i < items.Count(); i++)
+                                message += $"{i + 1} - {items[i].Title}   /News_{items[i].NewsId}\n";
+
+                            await _bot.SendTextMessageAsync(chatId, message);
+                        }
                         else
                         {
                             if (text.StartsWith("/News_"))
-                            { 
+                            {
                                 int newsId = 0;
                                 if (int.TryParse(text.Split("_")[1], out newsId))
                                 {
@@ -272,22 +365,26 @@ namespace NewsBot.Controllers
                                         {
                                             message += $"#{item.KeyWord.Title} ";
                                         }
-                                        await botClient.SendTextMessageAsync( chatId, message, parseMode: ParseMode.Html);
+
+                                        bool isSaved = await _repoUserCollection.TableNoTracking.AnyAsync(u => u.UserId == user.Id && u.NewsId == newsId);
+
+                                        await botClient.SendTextMessageAsync(chatId, message, parseMode: ParseMode.Html, replyMarkup: Buttons.GenerateNewsKeyboard(newsId, isSaved));
                                     }
                                     else
-                                        await botClient.SendTextMessageAsync(chatId,  DefaultContents.MessageIsNotValid);
+                                        await botClient.SendTextMessageAsync(chatId, DefaultContents.MessageIsNotValid);
 
                                 }
                             }
-                           else if (lastActivity.ActivityType is ActivityType.EditFirstName || lastActivity.ActivityType is ActivityType.GetEditFirstNameConfirmation)
+
+                            else if (lastActivity.ActivityType is ActivityType.EditFirstName || lastActivity.ActivityType is ActivityType.GetEditFirstNameConfirmation)
                             {
                                 await _user.AddActivityLog(user.Id, ActivityType.GetEditFirstNameConfirmation, cancellationToken);
 
                                 await botClient.SendTextMessageAsync(chatId, DefaultContents.EditLastNameAlert, replyMarkup: Buttons.GenerateConfirmationKeyboard(text));
                             }
-                            else if(lastActivity.ActivityType is ActivityType.Search)
+                            else if (lastActivity.ActivityType is ActivityType.Search)
                             {
-                                await _user.AddActivityLog(  user.Id, ActivityType.ShowSearchResult , cancellationToken);
+                                await _user.AddActivityLog(user.Id, ActivityType.ShowSearchResult, cancellationToken);
 
                                 var news = await _repoNews
                                           .TableNoTracking
@@ -296,6 +393,11 @@ namespace NewsBot.Controllers
                                           .Where(n => n.Title.Contains(text) || n.NewsKeyWords.Any(z => z.KeyWord.Title == text))
                                           .ToListAsync();
 
+                                if (news.Count is 0)
+                                {
+                                    await _bot.SendTextMessageAsync(chatId, DefaultContents.EmptySearchNews);
+                                    return Ok();
+                                }
 
                                 var message = $"نتایج جستجو\n";
                                 for (int i = 0; i < news.Count(); i++)

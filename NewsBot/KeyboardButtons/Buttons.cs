@@ -33,7 +33,7 @@ namespace Utilities.KeyboardButtons
             var keyboard = new ReplyKeyboardMarkup(rows);
 
             return keyboard;
-        } 
+        }
         public static InlineKeyboardMarkup GenerateConfirmationKeyboard(string text)
         {
             var rows = new List<InlineKeyboardButton[]>();
@@ -42,11 +42,32 @@ namespace Utilities.KeyboardButtons
                 new InlineKeyboardButton(DefaultContents.Confirmed){CallbackData = $"Confirmed_{text}"}
              });
 
-              rows.Add(new InlineKeyboardButton[] {
+            rows.Add(new InlineKeyboardButton[] {
                 new InlineKeyboardButton(DefaultContents.Canceled){CallbackData="Canceled"}
              });
 
-            
+
+            var keyboard = new InlineKeyboardMarkup(rows);
+
+            return keyboard;
+        }
+        public static InlineKeyboardMarkup GenerateNewsKeyboard(int newsId, bool isSaved)
+        {
+            var rows = new List<InlineKeyboardButton[]>();
+
+            if (isSaved)
+            {
+                rows.Add(new InlineKeyboardButton[] {
+                new InlineKeyboardButton(DefaultContents.DeleteFromSavedNews){CallbackData = $"UnSave_{newsId}"}
+             });
+            }
+            else
+            {
+                rows.Add(new InlineKeyboardButton[] {
+                new InlineKeyboardButton(DefaultContents.SaveNews){CallbackData=$"Save_{newsId}"}
+             });
+            }
+
             var keyboard = new InlineKeyboardMarkup(rows);
 
             return keyboard;
