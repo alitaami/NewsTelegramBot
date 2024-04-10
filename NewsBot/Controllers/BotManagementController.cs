@@ -1,14 +1,20 @@
-﻿using Data.Repositories;
+﻿using Azure.Core;
+using Data.Repositories;
 using FarzamNews.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NewsBot.Common.Utilities;
 using NewsBot.Data.NewsContext;
 using NewsBot.Entities;
 using NewsBot.Enums;
 using NewsBot.Services.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
 using System.Linq.Expressions;
+using System.Net;
+using System.Net.WebSockets;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -246,6 +252,42 @@ namespace NewsBot.Controllers
 
                             }
                         }
+                        else if (text == "Dollar")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("usd_buy");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
+                        else if (text == "Derham")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("dirham_dubai");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
+                        else if (text == "Bahar")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("bahar");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
+                        else if (text == "Nim")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("nim");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
+                        else if (text == "Rob")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("rob");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
+                        else if (text == "18Ayar")
+                        {
+                            var message = await CurrencyApiParser.GetLatestPriceAsync("18ayar");
+
+                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                        }
                     }
 
                     if (update.Message is not null)
@@ -292,7 +334,7 @@ namespace NewsBot.Controllers
                         else if (text == DefaultContents.Money)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.GetMoneyNews, cancellationToken);
-                            await botClient.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage, cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage, cancellationToken: cancellationToken, replyMarkup: Buttons.GenerateCurrencyKeyboard());
                         }
                         else if (text == DefaultContents.Profile)
                         {

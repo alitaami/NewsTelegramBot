@@ -34,6 +34,30 @@ namespace Utilities.KeyboardButtons
 
             return keyboard;
         }
+
+        public static InlineKeyboardMarkup GenerateCurrencyKeyboard()
+        {
+            var rows = new List<InlineKeyboardButton[]>();
+
+            rows.Add(new InlineKeyboardButton[] {
+                new InlineKeyboardButton(DefaultContents.Dollar){CallbackData = "Dollar"},
+                new InlineKeyboardButton(DefaultContents.Derham){CallbackData="Derham"}
+            });
+
+            rows.Add(new InlineKeyboardButton[] {
+                new InlineKeyboardButton(DefaultContents.Bahar){CallbackData="Bahar"},
+                new InlineKeyboardButton(DefaultContents.Nim){CallbackData="Nim"}
+             });
+
+            rows.Add(new InlineKeyboardButton[] {
+                new InlineKeyboardButton(DefaultContents.Rob){CallbackData="Rob"},
+                new InlineKeyboardButton(DefaultContents._18Ayar){CallbackData="18Ayar"}
+            });
+             
+            var keyboard = new InlineKeyboardMarkup(rows);
+
+            return keyboard;
+        }
         public static InlineKeyboardMarkup GenerateConfirmationKeyboard(string text)
         {
             var rows = new List<InlineKeyboardButton[]>();
