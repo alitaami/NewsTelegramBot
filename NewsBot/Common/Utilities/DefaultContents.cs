@@ -39,13 +39,16 @@ namespace FarzamNews.Utilities
 
         public static readonly string ContactUsMessage = "\U0001F4E7: alitaami81@gmail.com\n\U0000260E: 09301327634".CleanString();
         public static readonly string MoneyMessage = " قیمت لحظه ای  ".CleanString();
+        public static readonly string MoneyMessage2 = " جهت اطلاع از قیمت ارز دلخواه، روی گزینه مورد نظر کلیک کنید  ".CleanString();
         public static readonly string MessageIsNotValid = "دستور وارد شده نامعتبر است".CleanString();
         public static readonly string NewsNotFound = "شناسه خبر نامعتبر است".CleanString();
+        public static readonly string NewsNotFound2 = " خبری جهت نمایش در این تاریخ وجود ندارد ".CleanString();
         public static readonly string PleaseEnterYourText = "لطفا متن مورد نظر را وارد کنید".CleanString();
         public static readonly string EmptySavedNews = "شما خبر ذخیره شده ای ندارید!".CleanString();
         public static readonly string EmptySearchNews = "نتیجه ای یافت نشد!".CleanString();
         public static readonly string TryLater = "داده های موجود در حال بروز رسانی میباشند، لطفا بعدا تلاش کنید".CleanString();
         public static readonly string ErrorOccured = "مشکلی پیش آمده است ، لطفا بعدا تلاش کنید".CleanString();
+        public static readonly string TooManyRequests = "درخواست های زیادی ارسال کرده اید، لطفا کمی بعد مجددا تلاش کنید".CleanString();
 
         public static readonly string Dollar = "دلار".CleanString();
         public static readonly string Derham = "درهم".CleanString();

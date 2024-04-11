@@ -20,6 +20,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Utilities.KeyboardButtons;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewsBot.Controllers
 {
@@ -256,37 +257,37 @@ namespace NewsBot.Controllers
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("usd_buy");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                         else if (text == "Derham")
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("dirham_dubai");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                         else if (text == "Bahar")
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("bahar");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                         else if (text == "Nim")
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("nim");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                         else if (text == "Rob")
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("rob");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                         else if (text == "18Ayar")
                         {
                             var message = await CurrencyApiParser.GetLatestPriceAsync("18ayar");
 
-                             await botClient.SendTextMessageAsync(chatId, message , cancellationToken: cancellationToken);
+                            await botClient.SendTextMessageAsync(chatId, message, cancellationToken: cancellationToken);
                         }
                     }
 
@@ -334,7 +335,7 @@ namespace NewsBot.Controllers
                         else if (text == DefaultContents.Money)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.GetMoneyNews, cancellationToken);
-                            await botClient.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage, cancellationToken: cancellationToken, replyMarkup: Buttons.GenerateCurrencyKeyboard());
+                            await botClient.SendTextMessageAsync(chatId, DefaultContents.MoneyMessage2, cancellationToken: cancellationToken, replyMarkup: Buttons.GenerateCurrencyKeyboard());
                         }
                         else if (text == DefaultContents.Profile)
                         {
@@ -354,14 +355,20 @@ namespace NewsBot.Controllers
                         else if (text == DefaultContents.HeadOfNews)
                         {
                             await _user.AddActivityLog(user.Id, ActivityType.GetHeadOfNews, cancellationToken);
-                            var today = DateTime.Now.Date;
-                            var items = await _repoNews.TableNoTracking.Where(x => x.CreatedDate.Date == today).Select(x => new { x.Id, x.Title }).Take(10).ToListAsync();
+                            var today = DateTime.Now;
+                            var items = await _repoNews.TableNoTracking.Where(x => x.CreatedDate.Date == today.Date).Select(x => new { x.Id, x.Title }).Take(10).ToListAsync();
+                            if (items.Count is 0)
+                            {
+                                await _bot.SendTextMessageAsync(chatId, DefaultContents.NewsNotFound2);
+                            }
+                            else
+                            {
+                                var message = $" سرتیتر اخبار امروز {DateConverter.ToShamsi(today)} : \n";
+                                for (int i = 0; i < items.Count(); i++)
+                                    message += $"{i + 1} - {items[i].Title}   /News_{items[i].Id}\n";
 
-                            var message = $"سرتیتر اخبار امروز {today.ToShortDateString()}\n";
-                            for (int i = 0; i < items.Count(); i++)
-                                message += $"{i + 1} - {items[i].Title}   /News_{items[i].Id}\n";
-
-                            await _bot.SendTextMessageAsync(chatId, message);
+                                await _bot.SendTextMessageAsync(chatId, message);
+                            }
                         }
                         else if (text == DefaultContents.Search)
                         {

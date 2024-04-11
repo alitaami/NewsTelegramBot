@@ -18,7 +18,12 @@ namespace NewsBot.Common.Utilities
                 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var data = JArray.Parse(jsonResponse);
+           
+                if(response.StatusCode is System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    message = DefaultContents.TooManyRequests;
 
+                }
                 if (!data.Any())
                 {
                     for (int i=1; i < 7; i++)
@@ -36,7 +41,6 @@ namespace NewsBot.Common.Utilities
                     }
                     return PriceExtracter(data, type);
                 }
-
                 else if (data.Any())
                 {
                     return PriceExtracter(data, type);
