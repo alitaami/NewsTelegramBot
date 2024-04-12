@@ -34,6 +34,11 @@ builder.Logging.ClearProviders();
 builder.Logging.AddNLogWeb();
 builder.Host.UseNLog();
 #endregion
+
+// Set the DataDirectory for accessing DB file easily in a static way
+string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+AppDomain.CurrentDomain.SetData("DataDirectory", baseDirectory);
+ 
 #region AddMvcAndJsonOptions
 builder.Services
                      .AddControllers()
