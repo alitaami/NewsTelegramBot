@@ -47,6 +47,7 @@ namespace FarzamNews.Utilities
         public static readonly string EmptySavedNews = "شما خبر ذخیره شده ای ندارید!".CleanString();
         public static readonly string EmptySearchNews = "نتیجه ای یافت نشد!".CleanString();
         public static readonly string TryLater = "داده های موجود در حال بروز رسانی میباشند، لطفا بعدا تلاش کنید".CleanString();
+        public static readonly string CurrencyNotFound = "داده ای برای این ارز یافت نشد، کمی بعد تلاش کنید".CleanString();
         public static readonly string ErrorOccured = "مشکلی پیش آمده است ، لطفا بعدا تلاش کنید".CleanString();
         public static readonly string TooManyRequests = "درخواست های زیادی ارسال کرده اید، لطفا کمی بعد مجددا تلاش کنید".CleanString();
 
