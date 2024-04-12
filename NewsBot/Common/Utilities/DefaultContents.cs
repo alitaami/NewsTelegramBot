@@ -4,7 +4,7 @@ namespace FarzamNews.Utilities
 {
     public static class DefaultContents
     {
-        public static readonly string Start = "/start".CleanString();
+        public static readonly string Start = "/start".CleanString(); 
         public static readonly string WelcomeToBot = "به ربات خوش امدید".CleanString();
         public static readonly string Search = "\U0001F50E جستجو \U0001F50E".CleanString();
         public static readonly string HeadOfNews = "\U0001F4F0 سرتیتر اخبار \U0001F4F0".CleanString();

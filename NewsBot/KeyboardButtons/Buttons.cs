@@ -10,7 +10,8 @@ namespace Utilities.KeyboardButtons
             var rows = new List<KeyboardButton[]>();
 
             rows.Add(new KeyboardButton[] {
-                new KeyboardButton(DefaultContents.Search)
+                new KeyboardButton(DefaultContents.Search),
+                new KeyboardButton(DefaultContents.Start)
              });
 
             rows.Add(new KeyboardButton[]
