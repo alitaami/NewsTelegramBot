@@ -8,8 +8,14 @@ namespace NewsBot.Entities
     {
         [Key]
         public int Id { get; set; }
+        
+        [MaxLength(50)]
         public string FirstName { get; set; }
+
+        [MaxLength(50)]
         public string? LastName { get; set; }
+      
+        [MaxLength(50)]
         public string? Username { get; set; }
         public long ChatId { get; set; }
         public UserType UserType { get; set; }

@@ -2,6 +2,7 @@ using AutoMapper;
 using Data.Repositories;
 using FarzamNews.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NewsBot.Data.NewsContext;
 using NewsBot.Entities;
 using NewsBot.Mappings;
@@ -57,10 +58,14 @@ builder.Services
                      });
 #endregion
 
-// Add services to the container.
+//// Add services to the container.
+//builder.Services.AddDbContext<NewsContext>(options =>
+//    options.UseSqlServer(
+//        connectionString: builder.Configuration.GetConnectionString("DbConnection")),
+//        ServiceLifetime.Scoped); // Change ServiceLifetime.Transient to ServiceLifetime.Scoped
+
 builder.Services.AddDbContext<NewsContext>(options =>
-    options.UseSqlServer(
-        connectionString: builder.Configuration.GetConnectionString("DbConnection")),
+    options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection")),
         ServiceLifetime.Scoped); // Change ServiceLifetime.Transient to ServiceLifetime.Scoped
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -105,7 +110,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
- 
+
 app.MapControllers();
 
 app.Run();
